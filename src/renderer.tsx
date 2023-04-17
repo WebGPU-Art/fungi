@@ -18,8 +18,11 @@ export const init = async ({ canvas }) => {
   });
 
   const GameOptions = {
-    width: 1024,
-    height: 1024,
+    width: (window.innerWidth >> 4) << 4,
+    height: (window.innerWidth >> 4) << 4,
+
+    // width: 1024,
+    // height: 888,
     timestep: 4,
     workgroupSize: 8,
   };
