@@ -272,6 +272,10 @@ export const init = async ({ canvas }) => {
 
     requestAnimationFrame(loop);
   })();
+
+  return {
+    resetGameData,
+  };
 };
 
 let displayError = (

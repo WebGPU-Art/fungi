@@ -28,14 +28,14 @@ function Container() {
           console.error(error);
         }}
       />
-      {fullHeight ? null : (
+      {/* {fullHeight ? null : (
         <ShaderEditor
           code={code}
           onChange={(text) => {
             setCode(text);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 }

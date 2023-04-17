@@ -15,6 +15,8 @@ function WgslCanvas(props: {
     y: 0,
   });
 
+  let rendererState = useRef(undefined);
+
   let render = async () => {
     console.info("rerender");
 
@@ -24,10 +26,21 @@ function WgslCanvas(props: {
     canvas.width = window.innerWidth * pixelRatio;
     canvas.height = window.innerHeight * pixelRatio;
 
-    init({ canvas });
+    rendererState.current = await init({ canvas });
+  };
+
+  let resizer = () => {
+    const canvas = canvasRef.current as HTMLCanvasElement;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
+    canvas.width = window.innerWidth * pixelRatio;
+    canvas.height = window.innerHeight * pixelRatio;
+
+    rendererState.current.resetGameData();
   };
 
   let debouncedRender = useDebouncedCallback(render, 100);
+  let debouncedResizer = useDebouncedCallback(resizer, 100);
   // let debouncedRender = () => {};
 
   // useEffect(() => {
@@ -39,9 +52,9 @@ function WgslCanvas(props: {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("resize", debouncedRender);
+    window.addEventListener("resize", debouncedResizer);
     return () => {
-      window.removeEventListener("resize", debouncedRender);
+      window.removeEventListener("resize", debouncedResizer);
     };
   }, []);
 
