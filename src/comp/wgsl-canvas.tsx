@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import Renderer from "../renderer";
+import { init } from "../renderer";
 
 let pixelRatio = window.devicePixelRatio || 1.0;
 
@@ -15,7 +15,7 @@ function WgslCanvas(props: {
     y: 0,
   });
 
-  let render = () => {
+  let render = async () => {
     console.info("rerender");
 
     const canvas = canvasRef.current as HTMLCanvasElement;
@@ -23,23 +23,20 @@ function WgslCanvas(props: {
     canvas.style.height = `${window.innerHeight}px`;
     canvas.width = window.innerWidth * pixelRatio;
     canvas.height = window.innerHeight * pixelRatio;
-    const renderer = new Renderer(canvas);
-    renderer.start(
-      props.vertWgsl
-        .replace("{%inner_width%}", window.innerWidth.toString())
-        .replace("{%inner_height%}", window.innerHeight.toString())
-        .replace(
-          "{%click_position%}",
-          `vec2(${clickPosition.x},${clickPosition.y})`
-        )
-    );
+
+    init({ canvas });
   };
 
   let debouncedRender = useDebouncedCallback(render, 100);
+  // let debouncedRender = () => {};
+
+  // useEffect(() => {
+  //   debouncedRender();
+  // }, [props.vertWgsl, clickPosition]);
 
   useEffect(() => {
     debouncedRender();
-  }, [props.vertWgsl, clickPosition]);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("resize", debouncedRender);
