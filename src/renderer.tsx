@@ -33,23 +33,22 @@ export const init = async ({ canvas }) => {
       {
         binding: 0,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "read-only-storage",
-        },
+        buffer: { type: "read-only-storage" },
       },
       {
         binding: 1,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "read-only-storage",
-        },
+        buffer: { type: "read-only-storage" },
       },
       {
         binding: 2,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "storage",
-        },
+        buffer: { type: "storage" },
+      },
+      {
+        binding: 3,
+        visibility: GPUShaderStage.COMPUTE,
+        buffer: { type: "read-only-storage" },
       },
     ],
   });
@@ -135,6 +134,8 @@ export const init = async ({ canvas }) => {
     ]);
     sizeBuffer.unmap();
     const length = GameOptions.width * GameOptions.height;
+
+    // create data for cells to compute
     const cells = new Uint32Array(length);
     for (let i = 0; i < length; i++) {
       cells[i] = Math.random() < 0.25 ? 1 : 0;
@@ -148,9 +149,26 @@ export const init = async ({ canvas }) => {
     new Uint32Array(buffer0.getMappedRange()).set(cells);
     buffer0.unmap();
 
+    // buffer1 is used as the ping-pong buffer of buffer0
     buffer1 = device.createBuffer({
       size: cells.byteLength,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
+    });
+
+    let rulesData = new Uint32Array(2 ** 9);
+    for (let i = 0; i < 2 ** 9; i++) {
+      // fill random 0/1 values
+      rulesData[i] = Math.random() < 0.5 ? 1 : 0;
+    }
+    console.warn("rules", rulesData.join(""));
+    // this buffer contains the rules data
+    let buffer2 = device.createBuffer({
+      size: rulesData.byteLength,
+      usage:
+        GPUBufferUsage.STORAGE |
+        GPUBufferUsage.COPY_DST |
+        GPUBufferUsage.UNIFORM |
+        GPUBufferUsage.VERTEX,
     });
 
     const bindGroup0 = device.createBindGroup({
@@ -159,6 +177,7 @@ export const init = async ({ canvas }) => {
         { binding: 0, resource: { buffer: sizeBuffer } },
         { binding: 1, resource: { buffer: buffer0 } },
         { binding: 2, resource: { buffer: buffer1 } },
+        { binding: 3, resource: { buffer: buffer2 } },
       ],
     });
 
@@ -168,6 +187,7 @@ export const init = async ({ canvas }) => {
         { binding: 0, resource: { buffer: sizeBuffer } },
         { binding: 1, resource: { buffer: buffer1 } },
         { binding: 2, resource: { buffer: buffer0 } },
+        { binding: 3, resource: { buffer: buffer2 } },
       ],
     });
 
@@ -203,7 +223,7 @@ export const init = async ({ canvas }) => {
 
     loopTimes = 0;
     render = () => {
-      console.log("rendering");
+      // console.log("rendering");
       const view = context.getCurrentTexture().createView();
       const renderPass: GPURenderPassDescriptor = {
         colorAttachments: [{ view, loadOp: "clear", storeOp: "store" }],
