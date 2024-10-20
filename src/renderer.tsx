@@ -19,8 +19,8 @@ export const init = async ({ canvas }) => {
   });
 
   const GameOptions = {
-    width: window.innerWidth >> 2,
-    height: window.innerHeight >> 2,
+    width: window.innerWidth >> 1,
+    height: window.innerHeight >> 1,
 
     // width: 1024,
     // height: 888

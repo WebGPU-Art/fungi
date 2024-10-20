@@ -55,8 +55,8 @@ fn next_state_by_rule(x: u32, y: u32) -> u32 {
   for (var j = -1i; j <= 1i; j = j + 1i) {
     for (var i = -1i; i <= 1i; i = i + 1i) {
       // however this is wrong
-      let local_y = 2 - j;
-      let local_x = 2 - i;
+      let local_y = 1 - j;
+      let local_x = 1 - i;
       let v = local_y * 3i + local_x;
       let scaled = pow_int(2u, u32(v));
 
