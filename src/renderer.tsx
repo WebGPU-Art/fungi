@@ -19,8 +19,8 @@ export const init = async ({ canvas }) => {
   });
 
   const GameOptions = {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: window.innerWidth >> 2,
+    height: window.innerHeight >> 2,
 
     // width: 1024,
     // height: 888
@@ -157,7 +157,7 @@ export const init = async ({ canvas }) => {
     });
 
     let rulesData = getRules();
-    console.warn("rules", rulesData.join(""));
+    console.warn(rulesData.join(""));
     // this buffer contains the rules data
     let buffer2 = device.createBuffer({
       size: rulesData.byteLength,
@@ -275,7 +275,7 @@ let displayError = (
   info: GPUCompilationInfo
 ) => {
   if (message == null) {
-    renderTip("ok~", "Ok");
+    // renderTip("ok~", "Ok");
   } else {
     console.error(info);
     let before = code.split("\n").slice(0, info.messages[0].lineNum).join("\n");

@@ -15,11 +15,23 @@ fn getIndex(x: i32, y: i32) -> i32 {
 }
 
 fn getCell(x: i32, y: i32) -> u32 {
-  // if x or y is negative, it will be converted to a positive number
-  if x < 0 || y < 0 {
-    return 0u;
-  }
-  return current[getIndex(x, y)];
+  // edge is a mirror
+  var index_x = x;
+  var index_y = y;
+  // if x < 0 {
+  //   return 1u;
+  // }
+  // if y < 0 {
+  //   return 1u;
+  // }
+  // if x >= i32(canvas_size.x) {
+  //   return 1u;
+  // }
+  // if y >= i32(canvas_size.y) {
+  //   return 1u;
+  // }
+
+  return current[getIndex(index_x, index_y)];
 }
 
 // power function
@@ -38,17 +50,19 @@ fn next_state_by_rule(x: u32, y: u32) -> u32 {
   let h = canvas_size.y;
   let w = canvas_size.x;
 
+
   var index = 0u;
   for (var j = -1i; j <= 1i; j = j + 1i) {
     for (var i = -1i; i <= 1i; i = i + 1i) {
+      // however this is wrong
       let local_y = 2 - j;
       let local_x = 2 - i;
       let v = local_y * 3i + local_x;
       let scaled = pow_int(2u, u32(v));
 
       // let cell = getCell(i32(x) + i, i32(y) + j);
-      let cell = getCell(i32(x) + i, i32(y) + j);
       // index = index + cell * (1u << u32(u32(i) + 1u) * 3u + (j + 1u));
+      let cell = getCell(i32(x) + i, i32(y) + j);
       index = index + cell * scaled;
     }
   }
@@ -60,6 +74,13 @@ fn next_state_by_rule(x: u32, y: u32) -> u32 {
 fn main(@builtin(global_invocation_id) grid: vec3<u32>) {
   let x = grid.x;
   let y = grid.y;
+  let w = canvas_size.x;
+  let h = canvas_size.y;
+
+  if x == 0u || y == 0u || x == w - 1u || y == h - 1u {
+    let index = getIndex(i32(x), i32(y));
+    return ;
+  }
   // let n = countNeighbors(x, y);
   let n = next_state_by_rule(x, y);
   // next[getIndex(x, y)] = select(u32(n == 3u), u32(n == 2u || n == 3u), getCell(x, y) == 1u);
