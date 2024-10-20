@@ -1,4 +1,4 @@
-import render from "bottom-tip";
+import renderTip from "bottom-tip";
 import mainWgsl from "../shaders/main.wgsl?raw";
 import computeWgsl from "../shaders/compute.wgsl?raw";
 
@@ -66,13 +66,7 @@ export const init = async ({ canvas }) => {
   const squareStride: GPUVertexBufferLayout = {
     arrayStride: 2 * squareVertices.BYTES_PER_ELEMENT,
     stepMode: "vertex",
-    attributes: [
-      {
-        shaderLocation: 1,
-        offset: 0,
-        format: "uint32x2",
-      },
-    ],
+    attributes: [{ shaderLocation: 1, offset: 0, format: "uint32x2" }],
   };
 
   const vertexShader = device.createShaderModule({ code: mainWgsl });
@@ -98,9 +92,7 @@ export const init = async ({ canvas }) => {
       {
         binding: 0,
         visibility: GPUShaderStage.VERTEX,
-        buffer: {
-          type: "uniform",
-        },
+        buffer: { type: "uniform" },
       },
     ],
   });
@@ -108,13 +100,7 @@ export const init = async ({ canvas }) => {
   const cellsStride: GPUVertexBufferLayout = {
     arrayStride: Uint32Array.BYTES_PER_ELEMENT,
     stepMode: "instance",
-    attributes: [
-      {
-        shaderLocation: 0,
-        offset: 0,
-        format: "uint32",
-      },
-    ],
+    attributes: [{ shaderLocation: 0, offset: 0, format: "uint32" }],
   };
 
   let wholeTime = 0,
@@ -131,9 +117,7 @@ export const init = async ({ canvas }) => {
       compute: {
         module: computeShader,
         entryPoint: "main",
-        constants: {
-          blockSize: GameOptions.workgroupSize,
-        },
+        constants: { blockSize: GameOptions.workgroupSize },
       },
     });
     const sizeBuffer = device.createBuffer({
@@ -202,24 +186,17 @@ export const init = async ({ canvas }) => {
       fragment: {
         module: vertexShader,
         entryPoint: "frag_main",
-        targets: [
-          {
-            format: presentationFormat,
-          },
-        ],
+        targets: [{ format: presentationFormat }],
       },
     });
 
+    let uniformSize = 2 * Uint32Array.BYTES_PER_ELEMENT;
     const uniformBindGroup = device.createBindGroup({
       layout: renderPipeline.getBindGroupLayout(0),
       entries: [
         {
           binding: 0,
-          resource: {
-            buffer: sizeBuffer,
-            offset: 0,
-            size: 2 * Uint32Array.BYTES_PER_ELEMENT,
-          },
+          resource: { buffer: sizeBuffer, offset: 0, size: uniformSize },
         },
       ],
     });
@@ -229,13 +206,7 @@ export const init = async ({ canvas }) => {
       console.log("rendering");
       const view = context.getCurrentTexture().createView();
       const renderPass: GPURenderPassDescriptor = {
-        colorAttachments: [
-          {
-            view,
-            loadOp: "clear",
-            storeOp: "store",
-          },
-        ],
+        colorAttachments: [{ view, loadOp: "clear", storeOp: "store" }],
       };
       commandEncoder = device.createCommandEncoder();
 
@@ -276,9 +247,7 @@ export const init = async ({ canvas }) => {
     requestAnimationFrame(loop);
   })();
 
-  return {
-    resetGameData,
-  };
+  return { resetGameData };
 };
 
 let displayError = (
@@ -287,11 +256,11 @@ let displayError = (
   info: GPUCompilationInfo
 ) => {
   if (message == null) {
-    render("ok~", "Ok");
+    renderTip("ok~", "Ok");
   } else {
     console.error(info);
     let before = code.split("\n").slice(0, info.messages[0].lineNum).join("\n");
     let space = " ".repeat(info.messages[0].linePos - 1);
-    render("error", before + "\n" + space + "^ " + message);
+    renderTip("error", before + "\n" + space + "^ " + message);
   }
 };

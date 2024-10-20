@@ -16,9 +16,7 @@ fn getCell(x: u32, y: u32) -> u32 {
 }
 
 fn countNeighbors(x: u32, y: u32) -> u32 {
-  return getCell(x - 1, y - 1) + getCell(x, y - 1) + getCell(x + 1, y - 1) +
-         getCell(x - 1, y) +                         getCell(x + 1, y) +
-         getCell(x - 1, y + 1) + getCell(x, y + 1) + getCell(x + 1, y + 1);
+  return getCell(x - 1u, y - 1u) + getCell(x, y - 1u) + getCell(x + 1u, y - 1u) + getCell(x - 1u, y) + getCell(x + 1u, y) + getCell(x - 1u, y + 1u) + getCell(x, y + 1u) + getCell(x + 1u, y + 1u);
 }
 
 @compute @workgroup_size(blockSize, blockSize)
