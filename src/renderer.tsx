@@ -1,12 +1,13 @@
 import renderTip from "bottom-tip";
 import mainWgsl from "../shaders/main.wgsl?raw";
 import computeWgsl from "../shaders/compute.wgsl?raw";
+import { getInitialCells, getRules } from "./rules";
 
 export const init = async ({ canvas }) => {
   const adapter = await navigator.gpu.requestAdapter();
   const device = await adapter.requestDevice();
   const context = canvas.getContext("webgpu") as GPUCanvasContext;
-  const devicePixelRatio = window.devicePixelRatio || 1;
+  const devicePixelRatio = 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -18,14 +19,17 @@ export const init = async ({ canvas }) => {
   });
 
   const GameOptions = {
-    width: (window.innerWidth >> 4) << 4,
-    height: (window.innerWidth >> 4) << 4,
+    width: window.innerWidth,
+    height: window.innerHeight,
 
     // width: 1024,
-    // height: 888,
-    timestep: 4,
+    // height: 888
+    /** to slow down rendering */
+    timestep: 1,
     workgroupSize: 8,
   };
+
+  console.log("GameOptions", GameOptions);
 
   const computeShader = device.createShaderModule({ code: computeWgsl });
   const bindGroupLayoutCompute = device.createBindGroupLayout({
@@ -33,7 +37,7 @@ export const init = async ({ canvas }) => {
       {
         binding: 0,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: { type: "read-only-storage" },
+        buffer: { type: "uniform" },
       },
       {
         binding: 1,
@@ -136,10 +140,7 @@ export const init = async ({ canvas }) => {
     const length = GameOptions.width * GameOptions.height;
 
     // create data for cells to compute
-    const cells = new Uint32Array(length);
-    for (let i = 0; i < length; i++) {
-      cells[i] = Math.random() < 0.25 ? 1 : 0;
-    }
+    const cells = getInitialCells(GameOptions.width, GameOptions.height);
 
     buffer0 = device.createBuffer({
       size: cells.byteLength,
@@ -155,21 +156,16 @@ export const init = async ({ canvas }) => {
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
     });
 
-    let rulesData = new Uint32Array(2 ** 9);
-    for (let i = 0; i < 2 ** 9; i++) {
-      // fill random 0/1 values
-      rulesData[i] = Math.random() < 0.5 ? 1 : 0;
-    }
+    let rulesData = getRules();
     console.warn("rules", rulesData.join(""));
     // this buffer contains the rules data
     let buffer2 = device.createBuffer({
       size: rulesData.byteLength,
-      usage:
-        GPUBufferUsage.STORAGE |
-        GPUBufferUsage.COPY_DST |
-        GPUBufferUsage.UNIFORM |
-        GPUBufferUsage.VERTEX,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: true,
     });
+    new Uint32Array(buffer2.getMappedRange()).set(rulesData);
+    buffer2.unmap();
 
     const bindGroup0 = device.createBindGroup({
       layout: bindGroupLayoutCompute,
@@ -210,20 +206,23 @@ export const init = async ({ canvas }) => {
       },
     });
 
-    let uniformSize = 2 * Uint32Array.BYTES_PER_ELEMENT;
     const uniformBindGroup = device.createBindGroup({
       layout: renderPipeline.getBindGroupLayout(0),
       entries: [
         {
           binding: 0,
-          resource: { buffer: sizeBuffer, offset: 0, size: uniformSize },
+          resource: {
+            buffer: sizeBuffer,
+            offset: 0,
+            size: 2 * Uint32Array.BYTES_PER_ELEMENT,
+          },
         },
       ],
     });
 
     loopTimes = 0;
     render = () => {
-      // console.log("rendering");
+      console.log("rendering");
       const view = context.getCurrentTexture().createView();
       const renderPass: GPURenderPassDescriptor = {
         colorAttachments: [{ view, loadOp: "clear", storeOp: "store" }],
@@ -235,8 +234,8 @@ export const init = async ({ canvas }) => {
       passEncoderCompute.setPipeline(computePipeline);
       passEncoderCompute.setBindGroup(0, loopTimes ? bindGroup1 : bindGroup0);
       passEncoderCompute.dispatchWorkgroups(
-        GameOptions.width / GameOptions.workgroupSize,
-        GameOptions.height / GameOptions.workgroupSize
+        Math.ceil(GameOptions.width / GameOptions.workgroupSize),
+        Math.ceil(GameOptions.height / GameOptions.workgroupSize)
       );
       passEncoderCompute.end();
       // render
