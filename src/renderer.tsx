@@ -1,12 +1,14 @@
-import render from "bottom-tip";
+import renderTip from "bottom-tip";
 import mainWgsl from "../shaders/main.wgsl?raw";
 import computeWgsl from "../shaders/compute.wgsl?raw";
+import { getInitialCells, getRules } from "./rules";
+import { binaryToHex, hexToBinary } from "./hex-code";
 
 export const init = async ({ canvas }) => {
   const adapter = await navigator.gpu.requestAdapter();
   const device = await adapter.requestDevice();
   const context = canvas.getContext("webgpu") as GPUCanvasContext;
-  const devicePixelRatio = window.devicePixelRatio || 1;
+  const devicePixelRatio = 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -18,14 +20,17 @@ export const init = async ({ canvas }) => {
   });
 
   const GameOptions = {
-    width: (window.innerWidth >> 4) << 4,
-    height: (window.innerWidth >> 4) << 4,
+    width: window.innerWidth >> 1,
+    height: window.innerHeight >> 1,
 
     // width: 1024,
-    // height: 888,
-    timestep: 4,
+    // height: 888
+    /** to slow down rendering */
+    timestep: 1,
     workgroupSize: 8,
   };
+
+  console.log("GameOptions", GameOptions);
 
   const computeShader = device.createShaderModule({ code: computeWgsl });
   const bindGroupLayoutCompute = device.createBindGroupLayout({
@@ -33,23 +38,22 @@ export const init = async ({ canvas }) => {
       {
         binding: 0,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "read-only-storage",
-        },
+        buffer: { type: "uniform" },
       },
       {
         binding: 1,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "read-only-storage",
-        },
+        buffer: { type: "read-only-storage" },
       },
       {
         binding: 2,
         visibility: GPUShaderStage.COMPUTE,
-        buffer: {
-          type: "storage",
-        },
+        buffer: { type: "storage" },
+      },
+      {
+        binding: 3,
+        visibility: GPUShaderStage.COMPUTE,
+        buffer: { type: "read-only-storage" },
       },
     ],
   });
@@ -66,13 +70,7 @@ export const init = async ({ canvas }) => {
   const squareStride: GPUVertexBufferLayout = {
     arrayStride: 2 * squareVertices.BYTES_PER_ELEMENT,
     stepMode: "vertex",
-    attributes: [
-      {
-        shaderLocation: 1,
-        offset: 0,
-        format: "uint32x2",
-      },
-    ],
+    attributes: [{ shaderLocation: 1, offset: 0, format: "uint32x2" }],
   };
 
   const vertexShader = device.createShaderModule({ code: mainWgsl });
@@ -98,9 +96,7 @@ export const init = async ({ canvas }) => {
       {
         binding: 0,
         visibility: GPUShaderStage.VERTEX,
-        buffer: {
-          type: "uniform",
-        },
+        buffer: { type: "uniform" },
       },
     ],
   });
@@ -108,13 +104,7 @@ export const init = async ({ canvas }) => {
   const cellsStride: GPUVertexBufferLayout = {
     arrayStride: Uint32Array.BYTES_PER_ELEMENT,
     stepMode: "instance",
-    attributes: [
-      {
-        shaderLocation: 0,
-        offset: 0,
-        format: "uint32",
-      },
-    ],
+    attributes: [{ shaderLocation: 0, offset: 0, format: "uint32" }],
   };
 
   let wholeTime = 0,
@@ -131,9 +121,7 @@ export const init = async ({ canvas }) => {
       compute: {
         module: computeShader,
         entryPoint: "main",
-        constants: {
-          blockSize: GameOptions.workgroupSize,
-        },
+        constants: { blockSize: GameOptions.workgroupSize },
       },
     });
     const sizeBuffer = device.createBuffer({
@@ -151,10 +139,9 @@ export const init = async ({ canvas }) => {
     ]);
     sizeBuffer.unmap();
     const length = GameOptions.width * GameOptions.height;
-    const cells = new Uint32Array(length);
-    for (let i = 0; i < length; i++) {
-      cells[i] = Math.random() < 0.25 ? 1 : 0;
-    }
+
+    // create data for cells to compute
+    const cells = getInitialCells(GameOptions.width, GameOptions.height);
 
     buffer0 = device.createBuffer({
       size: cells.byteLength,
@@ -164,10 +151,35 @@ export const init = async ({ canvas }) => {
     new Uint32Array(buffer0.getMappedRange()).set(cells);
     buffer0.unmap();
 
+    // buffer1 is used as the ping-pong buffer of buffer0
     buffer1 = device.createBuffer({
       size: cells.byteLength,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
     });
+
+    let rulesData = getRules();
+
+    // console.log(rulesData.join(""));
+    console.log(binaryToHex(rulesData.join("")));
+    // console.log(hexToBinary(binaryToHex(rulesData.join(""))));
+    // console.log(binaryToHex(hexToBinary(binaryToHex(rulesData.join("")))));
+
+    navigator.clipboard
+      .writeText(binaryToHex(rulesData.join("")))
+      .then(() => {
+        console.log("Text copied to clipboard");
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
+    // this buffer contains the rules data
+    let buffer2 = device.createBuffer({
+      size: rulesData.byteLength,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: true,
+    });
+    new Uint32Array(buffer2.getMappedRange()).set(rulesData);
+    buffer2.unmap();
 
     const bindGroup0 = device.createBindGroup({
       layout: bindGroupLayoutCompute,
@@ -175,6 +187,7 @@ export const init = async ({ canvas }) => {
         { binding: 0, resource: { buffer: sizeBuffer } },
         { binding: 1, resource: { buffer: buffer0 } },
         { binding: 2, resource: { buffer: buffer1 } },
+        { binding: 3, resource: { buffer: buffer2 } },
       ],
     });
 
@@ -184,6 +197,7 @@ export const init = async ({ canvas }) => {
         { binding: 0, resource: { buffer: sizeBuffer } },
         { binding: 1, resource: { buffer: buffer1 } },
         { binding: 2, resource: { buffer: buffer0 } },
+        { binding: 3, resource: { buffer: buffer2 } },
       ],
     });
 
@@ -202,11 +216,7 @@ export const init = async ({ canvas }) => {
       fragment: {
         module: vertexShader,
         entryPoint: "frag_main",
-        targets: [
-          {
-            format: presentationFormat,
-          },
-        ],
+        targets: [{ format: presentationFormat }],
       },
     });
 
@@ -229,13 +239,7 @@ export const init = async ({ canvas }) => {
       console.log("rendering");
       const view = context.getCurrentTexture().createView();
       const renderPass: GPURenderPassDescriptor = {
-        colorAttachments: [
-          {
-            view,
-            loadOp: "clear",
-            storeOp: "store",
-          },
-        ],
+        colorAttachments: [{ view, loadOp: "clear", storeOp: "store" }],
       };
       commandEncoder = device.createCommandEncoder();
 
@@ -244,8 +248,8 @@ export const init = async ({ canvas }) => {
       passEncoderCompute.setPipeline(computePipeline);
       passEncoderCompute.setBindGroup(0, loopTimes ? bindGroup1 : bindGroup0);
       passEncoderCompute.dispatchWorkgroups(
-        GameOptions.width / GameOptions.workgroupSize,
-        GameOptions.height / GameOptions.workgroupSize
+        Math.ceil(GameOptions.width / GameOptions.workgroupSize),
+        Math.ceil(GameOptions.height / GameOptions.workgroupSize)
       );
       passEncoderCompute.end();
       // render
@@ -276,9 +280,7 @@ export const init = async ({ canvas }) => {
     requestAnimationFrame(loop);
   })();
 
-  return {
-    resetGameData,
-  };
+  return { resetGameData };
 };
 
 let displayError = (
@@ -287,11 +289,11 @@ let displayError = (
   info: GPUCompilationInfo
 ) => {
   if (message == null) {
-    render("ok~", "Ok");
+    // renderTip("ok~", "Ok");
   } else {
     console.error(info);
     let before = code.split("\n").slice(0, info.messages[0].lineNum).join("\n");
     let space = " ".repeat(info.messages[0].linePos - 1);
-    render("error", before + "\n" + space + "^ " + message);
+    renderTip("error", before + "\n" + space + "^ " + message);
   }
 };
