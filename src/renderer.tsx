@@ -2,7 +2,7 @@ import renderTip from "bottom-tip";
 import mainWgsl from "../shaders/main.wgsl?raw";
 import computeWgsl from "../shaders/compute.wgsl?raw";
 import { getInitialCells, getRules } from "./rules";
-import copy from "copy-text-to-clipboard";
+import { binaryToHex, hexToBinary } from "./hex-code";
 
 export const init = async ({ canvas }) => {
   const adapter = await navigator.gpu.requestAdapter();
@@ -158,17 +158,20 @@ export const init = async ({ canvas }) => {
     });
 
     let rulesData = getRules();
-    console.warn(rulesData.join(""));
-    copy?.(rulesData.join(""));
+
+    // console.log(rulesData.join(""));
+    console.log(binaryToHex(rulesData.join("")));
+    // console.log(hexToBinary(binaryToHex(rulesData.join(""))));
+    // console.log(binaryToHex(hexToBinary(binaryToHex(rulesData.join("")))));
+
     navigator.clipboard
-      .writeText(rulesData.join(""))
+      .writeText(binaryToHex(rulesData.join("")))
       .then(() => {
         console.log("Text copied to clipboard");
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);
       });
-
     // this buffer contains the rules data
     let buffer2 = device.createBuffer({
       size: rulesData.byteLength,
