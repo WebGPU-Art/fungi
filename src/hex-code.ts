@@ -9,7 +9,7 @@ export function binaryToHex(binary: string): string {
   let hex = "";
   for (let i = 0; i < binary.length; i += 4) {
     const chunk = binary.slice(i, i + 4);
-    const decimal = parseInt(chunk, 2);
+    const decimal = Number.parseInt(chunk, 2);
     hex += decimal.toString(16);
   }
 
@@ -24,7 +24,7 @@ export function hexToBinary(hex: string): string {
 
   let binary = "";
   for (let i = 0; i < hex.length; i++) {
-    const decimal = parseInt(hex[i], 16);
+    const decimal = Number.parseInt(hex[i], 16);
     const chunk = decimal.toString(2).padStart(4, "0");
     binary += chunk;
   }

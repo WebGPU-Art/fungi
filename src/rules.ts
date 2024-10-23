@@ -1,5 +1,3 @@
-/// looks like some pattern here
-
 import { hexToBinary } from "./hex-code";
 
 let rules = [

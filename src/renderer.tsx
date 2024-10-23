@@ -236,7 +236,7 @@ export const init = async ({ canvas }) => {
 
     loopTimes = 0;
     render = () => {
-      console.log("rendering");
+      // console.log("rendering");
       const view = context.getCurrentTexture().createView();
       const renderPass: GPURenderPassDescriptor = {
         colorAttachments: [{ view, loadOp: "clear", storeOp: "store" }],
@@ -294,6 +294,6 @@ let displayError = (
     console.error(info);
     let before = code.split("\n").slice(0, info.messages[0].lineNum).join("\n");
     let space = " ".repeat(info.messages[0].linePos - 1);
-    renderTip("error", before + "\n" + space + "^ " + message);
+    renderTip("error", `${before}\n${space}^ ${message}`);
   }
 };
