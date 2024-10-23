@@ -10,3 +10,7 @@ window.onload = () => {
     </React.StrictMode>
   );
 };
+
+// setTimeout(() => {
+//   location.replace(`/?now=${Date.now()}`);
+// }, 5000);

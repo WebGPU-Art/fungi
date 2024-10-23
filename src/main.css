@@ -5,6 +5,8 @@ body {
   overscroll-behavior-x: none;
 
   overflow: hidden;
+  background-color: black;
+
 }
 
 body * {
