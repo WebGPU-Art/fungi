@@ -85,7 +85,7 @@ export let getRules = () => {
   let rulesData = new Uint32Array(2 ** 9);
   for (let i = 0; i < 2 ** 9; i++) {
     rulesData[i] = Math.random() < 0.8 ? 1 : 0;
-    rulesData[i] = rules[28][i];
+    // rulesData[i] = rules[28][i];
   }
 
   return rulesData;
