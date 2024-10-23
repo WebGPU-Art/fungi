@@ -3,6 +3,7 @@ import mainWgsl from "../shaders/main.wgsl?raw";
 import computeWgsl from "../shaders/compute.wgsl?raw";
 import { getInitialCells, getRules } from "./rules";
 import { binaryToHex, hexToBinary } from "./hex-code";
+import { getGridSize, getSlowSize } from "./params";
 
 export const init = async ({ canvas }) => {
   const adapter = await navigator.gpu.requestAdapter();
@@ -19,14 +20,17 @@ export const init = async ({ canvas }) => {
     alphaMode: "premultiplied",
   });
 
+  let gridSize = getGridSize();
+  let slowSpeed = getSlowSize();
+
   const GameOptions = {
-    width: window.innerWidth >> 1,
-    height: window.innerHeight >> 1,
+    width: window.innerWidth >> gridSize,
+    height: window.innerHeight >> gridSize,
 
     // width: 1024,
     // height: 888
     /** to slow down rendering */
-    timestep: 1,
+    timestep: slowSpeed,
     workgroupSize: 8,
   };
 

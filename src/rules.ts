@@ -1,4 +1,5 @@
 import { hexToBinary } from "./hex-code";
+import { getAutoRule } from "./params";
 
 let rules = [
   // 0. expand triangles
@@ -137,8 +138,18 @@ let rules = [
 
 export let getRules = () => {
   let rulesData = new Uint32Array(2 ** 9);
+
+  let passedRule = getAutoRule();
+  let passedData = undefined;
+  if (passedRule) {
+    passedData = hexToBinary(passedRule).split("").map(Number);
+  }
+
   for (let i = 0; i < 2 ** 9; i++) {
     rulesData[i] = Math.random() < 0.8 ? 1 : 0;
+    if (passedRule) {
+      rulesData[i] = passedData[i];
+    }
     // rulesData[i] = rules[28][i];
   }
 
