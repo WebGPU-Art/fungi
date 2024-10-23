@@ -79,6 +79,62 @@ let rules = [
   hexToBinary(
     "ffd6ffdf57fdadffffffddfbfd77fbcedefffad7fd3ef9bcffffbcdf6fffffffff56cdf9ff7bfbdedfcb37bde3ff7f6f3df57fd76b7ee7b7ffbf7ffbef7e17bd"
   ),
+  // 29. stabled
+  hexToBinary(
+    "b9f6ffff3becfddebfffdfedfb16dff9dbb77aebbfafefff7ff7ffdfffdfbfbfefcff277f7cfffbf77ff67ff1eeffcfdbff7fbbdff9ff7f5f76b6feafebeef7f"
+  ),
+  // 30. beach line
+  hexToBinary(
+    "f77df7bf7dd77feffb7ecdbbebfef7ffe7fbf73f72fddbddfeeff3faff5bfffffba76ef6bbddf7fbfff477f3dbeefe7dfffef42ff6fcffdbffbe7eefb7bbff7d"
+  ),
+  // 31. melt
+  hexToBinary(
+    "dffdff7bbbeffef5f7e7eb6dfbc7eeffdf6effff9f71fff9edeeeffdf3ff7fbfff2fdfbcef77f7ffffd7fef3f9f7ffffffbffff6dfbfffbfdffbfff7eb7fffe2"
+  ),
+  // 32. slow felt
+  hexToBinary(
+    "37fff7ff1fff7dff7dfdffbafbde7dfffbfb7ff5ddfff9f6d7fdd3fffff7b6cdf7fbf5d9d6ffbfbf1ffdffdfffff5f4bdfafffaaffaedfff9fdbebfffff6fdef"
+  ),
+  // 33. flames
+  hexToBinary(
+    "7ffdf6f5fffbef7fadff57bfbfbfffffef9b6e6dfd7fe97effdd7f6e5fbf7bf9bcbbf3fcfb5fffbfed95febd7e5eded7dfff7fbbdfe3f9bdbdc74fef76ffef7b"
+  ),
+  // 34. rivers
+  hexToBinary(
+    "6f7fe7ddf7fd7fafffef7f7faefedf5fdfeeffdbf3ffffbf97dfbfa7bfdffefecf7efbafb7efbfeefff5dfddf2b32ddaddffb7ffdf7f56f5ff67ac9ffffbf7ff"
+  ),
+  // 35. wave 2 directions
+  hexToBinary(
+    "dfb97fdf7febdffff77ac7f3ed7ebf7d5dfedff4bffdfffbf7ffeffebf5df7eff7f6fff5bfffbb7fbfb99feffdfdfff7fb75ddfedffebfb7ffd7e38fffefb2b7"
+  ),
+  // 36. temp triangle
+  hexToBinary(
+    "7ff3fffcddbef5b7bee594ffd6ff778a5fbdfbf3bff7bfeffbe9bcbfe7dbf22dcaffcef77ae78fdffff3fd7dffd9fdbfffffffbd777fe7ffbffdbeefff7f7cf7"
+  ),
+  // 37. draw triangle dots
+  hexToBinary(
+    "f4f57dddfeedbe7bdffeaffbff7f3fff7f5bfd73ff5fff5ff753efffcdff7bf7d9fff3ffbbffb7edfffecffdfff717ffffffbfde7dfe7ffdf8663dfbbfda9d7f"
+  ),
+  // 38. grow trees in hill
+  hexToBinary(
+    "fdef7cf77fb9fffedff77df7fdffb9fedf7fffe775fdc7df7fbcd5ff9d7dffff7ef8b7faebefdbfffd7fcfef5f67beeb7adff56efaeeb7d7bfbf9596f6dfebcf"
+  ),
+  // 39. tiny golden fishes
+  hexToBinary(
+    "ff93febaff7cfdf795d9fdecfbffffffff5fffbdf7fb7fffeed7bffeb77ffeef7ffc96d77fae5dfff7bff7ebf6dafffffeef768f75bf6cd9e61bb7e5fffdeff7"
+  ),
+  // 40. wave lines
+  hexToBinary(
+    "df3ffefdfbfddeedfffbff7efffe3fbf5feaf1f7bfbbbdfddf7effaef6b5fffb3df33ffe6ffd2dfb54ef97bbfff7fffdfdfbbefdfffde77efffab3fdfed9eb7f"
+  ),
+  // 41. pattern two
+  hexToBinary(
+    "76af5f63ffbfdf53eff1f9fb779f0ec7eed3fbcf7f1f2ede3fff6d5f5fbf7ebffb7ff8ed5dfbffbfeafd9ffdbf7fadb7ff7eff9dff7fb9efcfcffffffffffffd"
+  ),
+  // 42. pattern switch
+  hexToBinary(
+    "bbfffb67f7f6fdff7e3fff3f9f82f7df7bfefbf77ddfd4d3fffffb8efeffbff5bff7ff6bf1cf3eef79fbfeffceddaefdfff5ff7fc9ebf7ffbbfefff5effffeff"
+  ),
 ].map((x) => x.split("").map(Number));
 
 export let getRules = () => {
