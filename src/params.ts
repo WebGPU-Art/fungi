@@ -12,3 +12,6 @@ export let getSlowSize = () => {
 export let getAutoRule = () => {
   return searchParams.get("rule") || undefined;
 };
+export let getIndex = () => {
+  return Number.parseInt(searchParams.get("index") || "0");
+};
