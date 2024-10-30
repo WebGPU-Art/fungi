@@ -19,7 +19,11 @@ function Container() {
   }, []);
 
   return (
-    <div>
+    <div
+      onClick={() => {
+        location.reload();
+      }}
+    >
       <WgslCanvas
         vertWgsl={code}
         onError={(error) => {
