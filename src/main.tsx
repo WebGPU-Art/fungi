@@ -23,7 +23,7 @@ let main = () => {
   window.addEventListener("keydown", (event) => {
     // check space key
     if (event.key === " ") {
-      location.replace(`/?grid=2&slow=2&index=${index + 1}`);
+      location.replace(`/?grid=1&slow=2&index=${index + 1}`);
     }
   });
 };
